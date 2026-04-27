@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NASA Mission Assurance · ROI System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap');
+  :root {
+    --nb:#0b3d91;--nr:#fc3d21;--nd:#0a0e1a;--nm:#111827;--np:#161d2e;
+    --nbr:rgba(11,61,145,0.4);--nt:#c8d8f0;--mu:#6b7fa3;--na:#4a9eff;
+    --oc:#8b5cf6;--ob:rgba(139,92,246,0.12);--obr:rgba(139,92,246,0.35);
+    --ic:#f59e0b;--ib:rgba(245,158,11,0.12);--ibr:rgba(245,158,11,0.35);
+    --fm:'Barlow',sans-serif;--fc:'Barlow Condensed',sans-serif;--mo:'Share Tech Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--fm);background:var(--nd);color:var(--nt);min-height:100vh;
+    background-image:radial-gradient(ellipse at 20% 0%,rgba(11,61,145,.15) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 100%,rgba(252,61,33,.08) 0%,transparent 50%);}
+
+  /* ─── Header ─── */
+  .hdr{background:var(--np);border-bottom:2px solid var(--nb);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:200;}
+  .hdr-brand{display:flex;align-items:center;gap:14px;}
+  .hdr-title{font-family:var(--fc);font-size:18px;font-weight:700;letter-spacing:.08em;color:#fff;text-transform:uppercase;}
+  .hdr-sub{font-size:10px;color:var(--mu);font-family:var(--mo);letter-spacing:.05em;}
+  .ubadge{background:rgba(11,61,145,.3);border:1px solid var(--nbr);padding:6px 13px;border-radius:4px;font-family:var(--mo);font-size:12px;color:var(--na);cursor:pointer;transition:all .2s;}
+  .ubadge:hover{background:rgba(11,61,145,.5);}
+  .abadge{background:rgba(252,61,33,.15);border:1px solid rgba(252,61,33,.4);padding:4px 9px;border-radius:4px;font-size:10px;font-family:var(--mo);color:var(--nr);text-transform:uppercase;letter-spacing:.1em;}
+
+  /* ─── Nav ─── */
+  .nav{background:var(--np);border-bottom:1px solid var(--nbr);display:flex;padding:0 1.5rem;overflow-x:auto;}
+  .ntab{padding:11px 18px;font-family:var(--fc);font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--mu);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;margin-bottom:-1px;white-space:nowrap;transition:all .2s;}
+  .ntab:hover{color:var(--nt);}
+  .ntab.active{color:var(--na);border-bottom-color:var(--na);}
+  .nsep{width:1px;background:var(--nbr);margin:8px 4px;flex-shrink:0;}
+  .tpill{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle;}
+
+  /* ─── Layout ─── */
+  .main{max-width:1440px;margin:0 auto;padding:1.5rem;}
+  .sec{display:none;}.sec.active{display:block;}
+
+  /* ─── Panel ─── */
+  .panel{background:var(--np);border:1px solid var(--nbr);border-radius:6px;overflow:hidden;}
+  .ph{background:rgba(11,61,145,.2);border-bottom:1px solid var(--nbr);padding:11px 18px;display:flex;align-items:center;justify-content:space-between;}
+  .pt{font-family:var(--fc);font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--na);}
+  .pb{padding:18px;}
+
+  /* ─── Form ─── */
+  .fg{display:flex;flex-direction:column;gap:5px;}
+  .fg.full{grid-column:1/-1;}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  label{font-size:10px;font-family:var(--mo);color:var(--mu);text-transform:uppercase;letter-spacing:.08em;}
+  input[type=text],textarea,select{background:rgba(0,0,0,.3);border:1px solid var(--nbr);border-radius:4px;
+    color:var(--nt);font-family:var(--fm);font-size:14px;padding:8px 11px;transition:border-color .2s;width:100%;}
+  input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--na);background:rgba(74,158,255,.05);}
+  textarea{resize:vertical;min-height:72px;}
+  select{cursor:pointer;}
+  select option{background:var(--nm);}
+
+  /* ─── Buttons ─── */
+  .btn{padding:9px 18px;border-radius:4px;font-family:var(--fc);font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;border:none;}
+  .btn-p{background:var(--nb);color:#fff;}.btn-p:hover{background:#1a52b5;}
+  .btn-o{background:rgba(139,92,246,.2);color:#a78bfa;border:1px solid rgba(139,92,246,.4);}.btn-o:hover{background:rgba(139,92,246,.35);}
+  .btn-i{background:rgba(245,158,11,.2);color:#fbbf24;border:1px solid rgba(245,158,11,.4);}.btn-i:hover{background:rgba(245,158,11,.35);}
+  .btn-d{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}.btn-d:hover{background:rgba(239,68,68,.25);}
+  .btn-g{background:transparent;color:var(--mu);border:1px solid var(--nbr);}.btn-g:hover{color:var(--nt);border-color:var(--nt);}
+  .btn-sm{padding:4px 11px;font-size:11px;}
+
+  /* ─── ID chips ─── */
+  .rid{font-family:var(--mo);font-size:11px;color:var(--na);background:rgba(74,158,255,.1);padding:2px 7px;border-radius:3px;white-space:nowrap;}
+  .oid{font-family:var(--mo);font-size:11px;color:#a78bfa;background:rgba(139,92,246,.12);padding:2px 7px;border-radius:3px;white-space:nowrap;}
+  .iid{font-family:var(--mo);font-size:11px;color:#fbbf24;background:rgba(245,158,11,.1);padding:2px 7px;border-radius:3px;white-space:nowrap;}
+
+  /* ─── Score chips ─── */
+  .sc{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:22px;border-radius:3px;font-size:11px;font-weight:700;font-family:var(--mo);padding:0 4px;}
+  .sl{background:rgba(34,197,94,.18);color:#22c55e;border:1px solid rgba(34,197,94,.35);}
+  .sm{background:rgba(234,179,8,.18);color:#eab308;border:1px solid rgba(234,179,8,.35);}
+  .sh{background:rgba(249,115,22,.18);color:#f97316;border:1px solid rgba(249,115,22,.35);}
+  .sk{background:rgba(239,68,68,.18);color:#ef4444;border:1px solid rgba(239,68,68,.35);}
+  .ol{background:rgba(139,92,246,.1);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);}
+  .om{background:rgba(139,92,246,.2);color:#a78bfa;border:1px solid rgba(139,92,246,.4);}
+  .oh{background:rgba(139,92,246,.3);color:#8b5cf6;border:1px solid rgba(139,92,246,.5);}
+  .ox{background:rgba(109,40,217,.4);color:#7c3aed;border:1px solid rgba(109,40,217,.6);}
+
+  /* ─── Severity chips ─── */
+  .sev{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;border-radius:3px;font-size:11px;font-weight:700;font-family:var(--mo);}
+  .sv-l{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3);}
+  .sv-m{background:rgba(234,179,8,.15);color:#eab308;border:1px solid rgba(234,179,8,.3);}
+  .sv-h{background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3);}
+  .sv-c{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+
+  /* ─── Status tags ─── */
+  .stag{display:inline-flex;align-items:center;font-size:10px;padding:2px 7px;border-radius:3px;font-family:var(--mo);}
+  .s-open{background:rgba(249,115,22,.1);color:#f97316;border:1px solid rgba(249,115,22,.3);}
+  .s-mit,.s-cap,.s-res{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.3);}
+  .s-mon{background:rgba(74,158,255,.1);color:#60a5fa;border:1px solid rgba(74,158,255,.3);}
+  .s-cls{background:rgba(107,127,163,.15);color:var(--mu);border:1px solid var(--nbr);}
+  .s-od{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+
+  /* ─── Rating grid ─── */
+  .rg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;}
+  .rb{border:1px solid var(--nbr);background:rgba(0,0,0,.3);color:var(--mu);border-radius:3px;padding:6px 2px;
+    cursor:pointer;text-align:center;font-size:9px;font-family:var(--mo);transition:all .15s;
+    display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .rb .n{font-size:16px;font-weight:700;color:var(--nt);}
+  .rb:hover{border-color:var(--na);color:var(--na);}
+  .rb.sel{border-color:var(--na);background:rgba(74,158,255,.15);color:var(--na);}
+  .rb.sel .n{color:var(--na);}
+  .rb.osel{border-color:#a78bfa!important;background:rgba(139,92,246,.18)!important;color:#a78bfa!important;}
+  .rb.osel .n{color:#a78bfa!important;}
+
+  /* ─── Section divider ─── */
+  .sdiv{font-family:var(--fc);font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--mu);margin:18px 0 11px;padding-bottom:5px;border-bottom:1px solid var(--nbr);}
+
+  /* ─── Table ─── */
+  .dt{width:100%;border-collapse:collapse;font-size:13px;}
+  .dt th{font-family:var(--mo);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);
+    padding:7px 11px;border-bottom:1px solid var(--nbr);text-align:left;}
+  .dt td{padding:9px 11px;border-bottom:1px solid rgba(11,61,145,.15);vertical-align:middle;}
+  .dt tr:hover td{background:rgba(74,158,255,.03);}
+
+  /* ─── Modal ─── */
+  .mov{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1.5rem;}
+  .mov.hidden{display:none;}
+  .modal{background:var(--np);border:1px solid var(--nbr);border-radius:8px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;}
+  .mhdr{background:rgba(11,61,145,.25);border-bottom:1px solid var(--nbr);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;}
+  .mtit{font-family:var(--fc);font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;}
+  .mcls{background:none;border:none;color:var(--mu);font-size:20px;cursor:pointer;line-height:1;}
+  .mcls:hover{color:#fff;}
+  .mbdy{padding:22px;}
+  .mftr{padding:14px 22px;border-top:1px solid var(--nbr);display:flex;justify-content:flex-end;gap:10px;}
+
+  /* ─── Login ─── */
+  .lw{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .lc{background:var(--np);border:1px solid var(--nbr);border-radius:8px;padding:38px;width:100%;max-width:440px;}
+  .lt{font-family:var(--fc);font-size:21px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#fff;text-align:center;margin-bottom:3px;}
+  .ls{font-family:var(--mo);font-size:10px;color:var(--mu);text-align:center;margin-bottom:30px;letter-spacing:.05em;}
+
+  /* ─── Type switcher ─── */
+  .tsw{display:flex;border:1px solid var(--nbr);border-radius:4px;overflow:hidden;margin-bottom:18px;}
+  .tb{flex:1;padding:10px;font-family:var(--fc);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--mu);transition:all .2s;}
+  .tb:hover{color:var(--nt);}
+  .tb.ar{background:rgba(74,158,255,.1);color:var(--na);border-bottom:2px solid var(--na);}
+  .tb.ao{background:rgba(139,92,246,.12);color:#a78bfa;border-bottom:2px solid #a78bfa;}
+  .tb.ai{background:rgba(245,158,11,.12);color:#fbbf24;border-bottom:2px solid #fbbf24;}
+
+  /* ─── Matrix cells – risk ─── */
+  .cg{background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.3);}
+  .cy{background:rgba(234,179,8,.2);border:1px solid rgba(234,179,8,.3);}
+  .co{background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.3);}
+  .cr{background:rgba(239,68,68,.25);border:1px solid rgba(239,68,68,.35);}
+  .cd{background:rgba(153,27,27,.35);border:1px solid rgba(153,27,27,.5);}
+
+  /* ─── Matrix cells – opportunity ─── */
+  .p1{background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.2);}
+  .p2{background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.3);}
+  .p3{background:rgba(139,92,246,.22);border:1px solid rgba(139,92,246,.4);}
+  .p4{background:rgba(139,92,246,.32);border:1px solid rgba(139,92,246,.5);}
+  .p5{background:rgba(109,40,217,.42);border:1px solid rgba(109,40,217,.6);}
+
+  /* ─── Kanban ─── */
+  .kb{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .kc{background:rgba(0,0,0,.2);border:1px solid var(--nbr);border-radius:6px;padding:11px;}
+  .kct{font-family:var(--fc);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--nbr);}
+  .kcard{background:var(--np);border:1px solid var(--nbr);border-radius:4px;padding:9px;margin-bottom:7px;cursor:pointer;transition:border-color .2s;}
+  .kcard:hover{border-color:rgba(245,158,11,.5);}
+
+  /* ─── Alert ─── */
+  .al{padding:11px 15px;border-radius:4px;font-size:13px;margin-bottom:14px;}
+  .al-i{background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.3);color:var(--na);}
+  .al-s{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#22c55e;}
+
+  /* ─── Progress bar ─── */
+  .pbar{height:5px;border-radius:3px;background:rgba(139,92,246,.15);overflow:hidden;margin-top:3px;}
+  .pfill{height:100%;border-radius:3px;background:#8b5cf6;transition:width .4s;}
+
+  /* ─── Type-section header in register ─── */
+  .tsec{display:flex;align-items:center;gap:10px;padding:9px 18px;background:rgba(0,0,0,.2);border-bottom:1px solid var(--nbr);}
+  .tsdot{width:9px;height:9px;border-radius:50%;}
+  .tstxt{font-family:var(--fc);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;}
+
+  /* ─── Overdue badge ─── */
+  .od{display:inline-block;background:rgba(239,68,68,.2);color:#ef4444;border:1px solid rgba(239,68,68,.4);
+    font-size:9px;font-family:var(--mo);padding:1px 5px;border-radius:3px;margin-left:5px;vertical-align:middle;}
+
+  /* ─── Utils ─── */
+  .f{display:flex;}.g2u{gap:8px;}.g3u{gap:12px;}.ac{align-items:center;}.jb{justify-content:space-between;}
+  .je{justify-content:flex-end;}.fw{flex-wrap:wrap;}.mb4{margin-bottom:14px;}.mb6{margin-bottom:22px;}.mt4{margin-top:14px;}
+  .tm{color:var(--mu);}
+  .es{text-align:center;padding:36px 18px;color:var(--mu);font-size:13px;}
+
+  /* scrollbar */
+  ::-webkit-scrollbar{width:5px;height:5px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(11,61,145,.5);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen" class="lw">
+  <div class="lc">
+    <div style="text-align:center;margin-bottom:24px;">
+      <svg width="72" height="72" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="#0b3d91" stroke-width="3"/>
+        <circle cx="50" cy="50" r="38" fill="#0b3d91"/>
+        <ellipse cx="50" cy="50" rx="48" ry="18" fill="none" stroke="#fc3d21" stroke-width="4"/>
+        <text x="50" y="57" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="white" letter-spacing="1">NASA</text>
+      </svg>
+    </div>
+    <div class="lt">Mission Assurance</div>
+    <div class="ls">Risk · Opportunity · Issue Management · NPR 8000.4B</div>
+    <div class="g2 mb4"><div class="fg"><label>First Name</label><input type="text" id="lF" placeholder="Jane"/></div><div class="fg"><label>Last Name</label><input type="text" id="lL" placeholder="Doe"/></div></div>
+    <div class="fg mb4"><label>Organization / Project</label><input type="text" id="lO" placeholder="e.g. Artemis Mission Systems"/></div>
+    <div class="fg mb6"><label>Role</label>
+      <select id="lR"><option value="">Select role…</option><option>Risk Owner</option><option>Mission Assurance</option><option>Systems Engineer</option><option>Program Manager</option><option>Safety Engineer</option><option value="Administrator">Administrator (Full Access)</option></select>
+    </div>
+    <button class="btn btn-p" style="width:100%;font-size:15px;" onclick="doLogin()">Enter System</button>
+    <div id="lErr" style="color:#ef4444;font-size:12px;text-align:center;margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="appShell" style="display:none;">
+  <header class="hdr">
+    <div class="hdr-brand">
+      <svg width="42" height="42" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="#0b3d91" stroke-width="2"/>
+        <circle cx="50" cy="50" r="38" fill="#0b3d91"/>
+        <ellipse cx="50" cy="50" rx="48" ry="16" fill="none" stroke="#fc3d21" stroke-width="3.5"/>
+        <text x="50" y="56" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="16" font-weight="900" fill="white" letter-spacing="1">NASA</text>
+      </svg>
+      <div><div class="hdr-title">Mission Assurance · ROI</div><div class="hdr-sub">Risk · Opportunity · Issue · NPR 8000.4B</div></div>
+    </div>
+    <div class="f ac g3u">
+      <span id="aHdr" class="abadge" style="display:none;">Admin</span>
+      <div class="ubadge" onclick="showUserModal()"><span id="hUser">–</span> <span style="color:var(--mu);font-size:10px;">▼</span></div>
+    </div>
+  </header>
+  <nav class="nav">
+    <button class="ntab active" onclick="go('dash',this)">Dashboard</button>
+    <button class="ntab" onclick="go('reg',this)">Register</button>
+    <button class="ntab" onclick="go('rmx',this)"><span class="tpill" style="background:var(--na);"></span>Risk Matrix</button>
+    <button class="ntab" onclick="go('omx',this)"><span class="tpill" style="background:var(--oc);"></span>Opp Matrix</button>
+    <button class="ntab" onclick="go('iss',this)"><span class="tpill" style="background:var(--ic);"></span>Issue Board</button>
+    <button class="ntab" onclick="go('add',this)">+ Add Item</button>
+    <div class="nsep"></div>
+    <button class="ntab" id="aTab" style="display:none;" onclick="go('adm',this)">Admin</button>
+  </nav>
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section id="s-dash" class="sec active">
+      <div id="statRow" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;"></div>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px;">
+        <div class="panel"><div class="ph"><span class="pt">Recent Activity</span></div><div id="dRecent"></div></div>
+        <div class="panel"><div class="ph"><span class="pt">Action Required</span></div><div id="dAction"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;">
+        <div class="panel"><div class="ph"><span class="pt">Risk Snapshot</span></div><div class="pb" id="dRmx"></div></div>
+        <div class="panel"><div class="ph"><span class="pt">Opportunity Snapshot</span></div><div class="pb" id="dOmx"></div></div>
+        <div class="panel"><div class="ph"><span class="pt">Issue Status</span></div><div class="pb" id="dIss"></div></div>
+      </div>
+    </section>
+
+    <!-- REGISTER -->
+    <section id="s-reg" class="sec">
+      <div class="panel">
+        <div class="ph">
+          <span class="pt">Combined Register</span>
+          <div class="f g2u ac fw">
+            <input type="text" id="rSrch" placeholder="Search…" style="width:170px;font-size:13px;" oninput="renderReg()"/>
+            <select id="rUser" style="font-size:12px;width:150px;" onchange="renderReg()"><option value="">All Users</option></select>
+            <select id="rType" style="font-size:12px;width:130px;" onchange="renderReg()">
+              <option value="">All Types</option><option value="risk">Risks</option><option value="opportunity">Opportunities</option><option value="issue">Issues</option>
+            </select>
+          </div>
+        </div>
+        <div id="regBody"></div>
+      </div>
+    </section>
+
+    <!-- RISK MATRIX -->
+    <section id="s-rmx" class="sec">
+      <div class="f g2u ac mb4 fw">
+        <select id="rmUF" style="width:180px;font-size:13px;" onchange="renderRMX()"><option value="">All Users</option></select>
+        <select id="rmPF" style="width:170px;font-size:13px;" onchange="renderRMX()">
+          <option value="all">Before &amp; After</option><option value="before">Before Mitigation</option><option value="after">After Mitigation</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;" id="rmxCont"></div>
+      <div class="panel mt4" style="margin-top:18px;"><div class="ph"><span class="pt">Risk Index</span></div><div id="rmxIdx" style="padding:0;"></div></div>
+    </section>
+
+    <!-- OPP MATRIX -->
+    <section id="s-omx" class="sec">
+      <div class="f g2u ac mb4 fw">
+        <select id="omUF" style="width:180px;font-size:13px;" onchange="renderOMX()"><option value="">All Users</option></select>
+        <select id="omPF" style="width:195px;font-size:13px;" onchange="renderOMX()">
+          <option value="all">Before &amp; After Exploitation</option><option value="before">Before Exploitation</option><option value="after">After Exploitation</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;" id="omxCont"></div>
+      <div class="panel mt4" style="margin-top:18px;"><div class="ph"><span class="pt">Opportunity Index</span></div><div id="omxIdx" style="padding:0;"></div></div>
+    </section>
+
+    <!-- ISSUE BOARD -->
+    <section id="s-iss" class="sec">
+      <div class="f g2u ac mb4 fw">
+        <select id="isUF" style="width:180px;font-size:13px;" onchange="renderIss()"><option value="">All Users</option></select>
+        <select id="isSF" style="width:145px;font-size:13px;" onchange="renderIss()">
+          <option value="">All Severities</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
+        </select>
+        <button class="btn btn-i btn-sm" onclick="goAdd('issue')">+ New Issue</button>
+      </div>
+      <div class="kb" id="issBoard"></div>
+      <div class="panel mt4" style="margin-top:18px;"><div class="ph"><span class="pt">Issue Register</span></div><div id="issTbl" style="padding:0;"></div></div>
+    </section>
+
+    <!-- ADD ITEM -->
+    <section id="s-add" class="sec">
+      <div class="panel">
+        <div class="ph"><span class="pt" id="fTitle">Log New Item</span></div>
+        <div class="pb">
+          <div id="fAlert"></div>
+          <div class="tsw">
+            <button class="tb ar" id="tbR" onclick="setType('risk')">Risk</button>
+            <button class="tb" id="tbO" onclick="setType('opportunity')">Opportunity</button>
+            <button class="tb" id="tbI" onclick="setType('issue')">Issue</button>
+          </div>
+
+          <!-- RISK FORM -->
+          <div id="fR">
+            <div class="sdiv">Identification</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Risk Title *</label><input type="text" id="rT" placeholder="Short descriptive title"/></div>
+              <div class="fg"><label>Category *</label><select id="rC"><option value="">Select…</option><option>Technical</option><option>Schedule</option><option>Cost</option><option>Safety</option><option>Mission Success</option><option>Environmental</option><option>External</option><option>Programmatic</option></select></div>
+              <div class="fg full"><label>Risk Statement (IF condition → THEN concern → RESULTING IN consequence) *</label><textarea id="rSt" placeholder="IF [condition], THEN [concern], RESULTING IN [consequence]…"></textarea></div>
+              <div class="fg full"><label>Root Cause</label><textarea id="rCa" rows="2" placeholder="Underlying root cause…"></textarea></div>
+            </div>
+            <div class="sdiv">Pre-Mitigation Assessment</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Likelihood (1–5)</label><div class="rg" id="rPLG"></div><div style="font-size:10px;color:var(--mu);margin-top:4px;" id="rPLL"></div></div>
+              <div class="fg"><label>Consequence (1–5)</label><div class="rg" id="rPCG"></div><div style="font-size:10px;color:var(--mu);margin-top:4px;" id="rPCL"></div></div>
+            </div>
+            <div class="sdiv">Mitigation Strategy</div>
+            <div class="g2 mb4">
+              <div class="fg full"><label>Proposed Mitigation Actions</label><textarea id="rM" placeholder="Specific actions to reduce likelihood or consequence…"></textarea></div>
+              <div class="fg"><label>Mitigation Owner</label><input type="text" id="rMO" placeholder="Name / Team"/></div>
+              <div class="fg"><label>Target Completion Date</label><input type="text" id="rMD" placeholder="YYYY-MM-DD"/></div>
+            </div>
+            <div class="sdiv">Post-Mitigation (Residual) Assessment</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Revised Likelihood (1–5)</label><div class="rg" id="rQLG"></div><div style="font-size:10px;color:var(--mu);margin-top:4px;" id="rQLL"></div></div>
+              <div class="fg"><label>Revised Consequence (1–5)</label><div class="rg" id="rQCG"></div><div style="font-size:10px;color:var(--mu);margin-top:4px;" id="rQCL"></div></div>
+            </div>
+            <div class="sdiv">Supporting Information</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Related Documents</label><input type="text" id="rD" placeholder="e.g. SSP-50021"/></div>
+              <div class="fg"><label>Watch Notes</label><input type="text" id="rN" placeholder="Tracking notes…"/></div>
+            </div>
+          </div>
+
+          <!-- OPP FORM -->
+          <div id="fO" style="display:none;">
+            <div class="sdiv" style="border-color:rgba(139,92,246,.4);color:#a78bfa;">Identification</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Opportunity Title *</label><input type="text" id="oT" placeholder="Short descriptive title"/></div>
+              <div class="fg"><label>Category *</label><select id="oC"><option value="">Select…</option><option>Technical Innovation</option><option>Schedule Acceleration</option><option>Cost Savings</option><option>Performance Enhancement</option><option>Partnership / Collaboration</option><option>Resource Optimization</option><option>Process Improvement</option><option>Knowledge Capture</option></select></div>
+              <div class="fg full"><label>Opportunity Statement (IF favorable condition → THEN exploit → RESULTING IN positive outcome) *</label><textarea id="oSt" placeholder="IF [favorable condition exists], THEN [we can exploit it], RESULTING IN [positive benefit]…"></textarea></div>
+              <div class="fg full"><label>Basis / Rationale</label><textarea id="oBs" rows="2" placeholder="Evidence or rationale that this opportunity is achievable…"></textarea></div>
+            </div>
+            <div class="sdiv" style="border-color:rgba(139,92,246,.4);color:#a78bfa;">Initial Assessment</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Probability of Capture (1–5)</label><div class="rg" id="oPPG"></div><div style="font-size:10px;color:#a78bfa;margin-top:4px;" id="oPPL"></div></div>
+              <div class="fg"><label>Benefit if Captured (1–5)</label><div class="rg" id="oPBG"></div><div style="font-size:10px;color:#a78bfa;margin-top:4px;" id="oPBL"></div></div>
+            </div>
+            <div class="sdiv" style="border-color:rgba(139,92,246,.4);color:#a78bfa;">Exploitation Strategy</div>
+            <div class="g2 mb4">
+              <div class="fg full"><label>Exploitation Actions</label><textarea id="oEx" placeholder="Specific actions to increase probability of capture and/or benefit magnitude…"></textarea></div>
+              <div class="fg"><label>Exploitation Owner</label><input type="text" id="oOw" placeholder="Name / Team"/></div>
+              <div class="fg"><label>Target Capture Date</label><input type="text" id="oDt" placeholder="YYYY-MM-DD"/></div>
+              <div class="fg"><label>Expected Return / Value</label><input type="text" id="oEV" placeholder="e.g. $2M savings, 30-day schedule gain"/></div>
+              <div class="fg"><label>Resources Required</label><input type="text" id="oRs" placeholder="e.g. 2 FTE for 3 months"/></div>
+            </div>
+            <div class="sdiv" style="border-color:rgba(139,92,246,.4);color:#a78bfa;">Post-Exploitation Assessment (Revised Estimate)</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Revised Probability (1–5)</label><div class="rg" id="oQPG"></div><div style="font-size:10px;color:#a78bfa;margin-top:4px;" id="oQPL"></div></div>
+              <div class="fg"><label>Revised Benefit (1–5)</label><div class="rg" id="oQBG"></div><div style="font-size:10px;color:#a78bfa;margin-top:4px;" id="oQBL"></div></div>
+            </div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Supporting Documents</label><input type="text" id="oD" placeholder="e.g. Tech Assessment TM-2026-001"/></div>
+              <div class="fg"><label>Notes</label><input type="text" id="oN" placeholder="Additional tracking notes…"/></div>
+            </div>
+          </div>
+
+          <!-- ISSUE FORM -->
+          <div id="fI" style="display:none;">
+            <div class="sdiv" style="border-color:rgba(245,158,11,.4);color:#fbbf24;">Identification</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Issue Title *</label><input type="text" id="iT" placeholder="Short descriptive title"/></div>
+              <div class="fg"><label>Category *</label><select id="iC"><option value="">Select…</option><option>Technical Deficiency</option><option>Schedule Slip</option><option>Cost Variance</option><option>Safety Concern</option><option>Interface Problem</option><option>Requirements Gap</option><option>Resource Shortage</option><option>Supplier / Vendor</option><option>Process Failure</option></select></div>
+              <div class="fg full"><label>Issue Description * (what is wrong, what is the impact?)</label><textarea id="iDs" placeholder="Describe the current problem, when discovered, and its impact on mission objectives…"></textarea></div>
+              <div class="fg full"><label>Root Cause Analysis</label><textarea id="iCa" rows="2" placeholder="What caused this issue to occur?"></textarea></div>
+            </div>
+            <div class="sdiv" style="border-color:rgba(245,158,11,.4);color:#fbbf24;">Impact Assessment</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Severity *</label><select id="iSv"><option value="">Select severity…</option><option value="Low">Low – Minimal mission impact</option><option value="Medium">Medium – Partial degradation</option><option value="High">High – Significant mission impact</option><option value="Critical">Critical – Mission failure risk</option></select></div>
+              <div class="fg"><label>Urgency</label><select id="iUg"><option value="">Select urgency…</option><option value="Low">Low – Address in next cycle</option><option value="Medium">Medium – Address within 2 weeks</option><option value="High">High – Address within 72 hours</option><option value="Immediate">Immediate – Stop-work potential</option></select></div>
+              <div class="fg"><label>Affected Systems / Subsystems</label><input type="text" id="iSy" placeholder="e.g. GNC, Thermal, Software"/></div>
+              <div class="fg"><label>Date Discovered</label><input type="text" id="iDd" placeholder="YYYY-MM-DD"/></div>
+            </div>
+            <div class="sdiv" style="border-color:rgba(245,158,11,.4);color:#fbbf24;">Corrective Action Plan</div>
+            <div class="g2 mb4">
+              <div class="fg full"><label>Immediate Containment Actions</label><textarea id="iCo" rows="2" placeholder="Short-term actions to contain the impact…"></textarea></div>
+              <div class="fg full"><label>Corrective Actions (Long-Term Fix)</label><textarea id="iAc" placeholder="Root-cause corrective actions to permanently resolve this issue…"></textarea></div>
+              <div class="fg"><label>Action Owner</label><input type="text" id="iAo" placeholder="Name / Team responsible"/></div>
+              <div class="fg"><label>Target Resolution Date *</label><input type="text" id="iDu" placeholder="YYYY-MM-DD"/></div>
+            </div>
+            <div class="sdiv" style="border-color:rgba(245,158,11,.4);color:#fbbf24;">Tracking</div>
+            <div class="g2 mb4">
+              <div class="fg"><label>Workflow Status</label><select id="iSt"><option>Identified</option><option>In Analysis</option><option>Corrective Action In Progress</option><option>Resolved</option></select></div>
+              <div class="fg"><label>Resolution Date (actual)</label><input type="text" id="iRd" placeholder="YYYY-MM-DD (fill when resolved)"/></div>
+              <div class="fg"><label>Related Documents / CARs</label><input type="text" id="iDoc" placeholder="e.g. CAR-2026-004"/></div>
+              <div class="fg"><label>Watch Notes</label><input type="text" id="iNo" placeholder="Tracking notes…"/></div>
+            </div>
+            <div class="fg mb4"><label>Verification Method (how will closure be confirmed?)</label><input type="text" id="iVe" placeholder="e.g. Successful test completion, design review approval…"/></div>
+          </div>
+
+          <div class="f je g2u">
+            <button class="btn btn-g" onclick="clearForm()">Clear</button>
+            <button class="btn btn-p" id="sbBtn" onclick="saveItem()">Submit</button>
+          </div>
+          <input type="hidden" id="eId" value=""/>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="s-adm" class="sec">
+      <div class="panel"><div class="ph"><span class="pt">Assignment Management</span></div><div id="admBody" style="padding:0;"></div></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Detail Modal -->
+<div id="detM" class="mov hidden">
+  <div class="modal">
+    <div class="mhdr"><span class="mtit" id="detTit">Detail</span><button class="mcls" onclick="cm('detM')">✕</button></div>
+    <div class="mbdy" id="detBdy"></div>
+    <div class="mftr"><button class="btn btn-g" onclick="cm('detM')">Close</button><button class="btn btn-p" id="detEdit">Edit</button></div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div id="usrM" class="mov hidden">
+  <div class="modal" style="max-width:400px;">
+    <div class="mhdr"><span class="mtit">User Profile</span><button class="mcls" onclick="cm('usrM')">✕</button></div>
+    <div class="mbdy">
+      <div class="fg mb4"><label>Display Name</label><input type="text" id="uName"/></div>
+      <div class="fg mb4"><label>Organization</label><input type="text" id="uOrg"/></div>
+      <div class="fg mb4"><label>Role</label><input type="text" id="uRole" disabled style="opacity:.5;"/></div>
+    </div>
+    <div class="mftr"><button class="btn btn-d btn-sm" onclick="logout()">Sign Out</button><button class="btn btn-g" onclick="cm('usrM')">Cancel</button><button class="btn btn-p" onclick="saveUser()">Save</button></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let CU=null; // current user
+let DB=JSON.parse(localStorage.getItem('nasaROI')||'[]');
+let US=JSON.parse(localStorage.getItem('nasaROIU')||'[]');
+let CTR=parseInt(localStorage.getItem('nasaROIC')||'2000');
+
+const save=()=>{localStorage.setItem('nasaROI',JSON.stringify(DB));localStorage.setItem('nasaROIU',JSON.stringify(US));localStorage.setItem('nasaROIC',String(CTR));};
+const risks=()=>DB.filter(x=>x.type==='risk');
+const opps=()=>DB.filter(x=>x.type==='opportunity');
+const isss=()=>DB.filter(x=>x.type==='issue');
+const today=()=>new Date().toISOString().split('T')[0];
+const isOD=(d)=>d&&new Date(d)<new Date();
+
+// Labels
+const LL=['','Remote','Unlikely','Occasional','Likely','Near Certain'];
+const CL=['','Minimal','Minor','Moderate','Critical','Catastrophic'];
+const PL=['','Very Low','Low','Moderate','High','Very High'];
+const BL=['','Marginal','Minor','Moderate','Significant','Major'];
+
+// Rating state
+let rPL=0,rPC=0,rQL=0,rQC=0,oPP=0,oPB=0,oQP=0,oQB=0;
+
+// ═══════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════
+function doLogin(){
+  const f=document.getElementById('lF').value.trim(), l=document.getElementById('lL').value.trim();
+  const o=document.getElementById('lO').value.trim(), r=document.getElementById('lR').value;
+  if(!f||!l||!r){document.getElementById('lErr').textContent='Please fill in all required fields.';return;}
+  const nm=`${f} ${l}`;
+  let u=US.find(x=>x.name===nm)||null;
+  if(!u){u={id:Date.now(),name:nm,org:o||'–',role:r};US.push(u);save();}
+  CU=u;
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='block';
+  document.getElementById('hUser').textContent=nm;
+  if(u.role==='Administrator'){document.getElementById('aHdr').style.display='';document.getElementById('aTab').style.display='';}
+  initGrids();renderAll();
+}
+function logout(){location.reload();}
+function showUserModal(){
+  document.getElementById('uName').value=CU.name;
+  document.getElementById('uOrg').value=CU.org;
+  document.getElementById('uRole').value=CU.role;
+  document.getElementById('usrM').classList.remove('hidden');
+}
+function saveUser(){
+  const n=document.getElementById('uName').value.trim(),o=document.getElementById('uOrg').value.trim();
+  if(n)CU.name=n;if(o)CU.org=o;
+  const i=US.findIndex(x=>x.id===CU.id);if(i>-1)US[i]=CU;
+  document.getElementById('hUser').textContent=CU.name;save();cm('usrM');
+}
+function cm(id){document.getElementById(id).classList.add('hidden');}
+
+// ═══════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════
+const renders={dash:renderDash,reg:renderReg,rmx:renderRMX,omx:renderOMX,iss:renderIss,adm:renderAdm};
+function go(id,el){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('s-'+id).classList.add('active');
+  if(renders[id])renders[id]();
+}
+function goAdd(type){
+  document.querySelectorAll('.ntab').forEach(t=>{const oc=t.getAttribute('onclick')||'';t.classList.toggle('active',oc.includes("'add'"));});
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-add').classList.add('active');
+  setType(type);
+}
+
+// ═══════════════════════════════════════════════════
+// RATING GRIDS
+// ═══════════════════════════════════════════════════
+function mkGrid(gid,lid,lbls,setter,isO){
+  const g=document.getElementById(gid);if(!g)return;g.innerHTML='';
+  const sh=['1','2','3','4','5'];
+  for(let i=1;i<=5;i++){
+    const b=document.createElement('button');b.type='button';b.className='rb';
+    b.innerHTML=`<span class="n">${i}</span><span>${lbls[i].split(' ')[0]}</span>`;
+    b.onclick=()=>{
+      setter(i);
+      g.querySelectorAll('.rb').forEach((x,j)=>{
+        x.classList.remove('sel','osel');
+        if(j+1===i)x.classList.add(isO?'osel':'sel');
+      });
+      const l=document.getElementById(lid);if(l)l.textContent=lbls[i];
+    };
+    g.appendChild(b);
+  }
+}
+function setGV(gid,lid,val,lbls,isO){
+  if(!val)return;
+  const g=document.getElementById(gid);if(!g)return;
+  g.querySelectorAll('.rb').forEach((b,j)=>{b.classList.remove('sel','osel');if(j+1===val)b.classList.add(isO?'osel':'sel');});
+  const l=document.getElementById(lid);if(l)l.textContent=lbls[val];
+}
+function initGrids(){
+  mkGrid('rPLG','rPLL',LL,v=>{rPL=v;});mkGrid('rPCG','rPCL',CL,v=>{rPC=v;});
+  mkGrid('rQLG','rQLL',LL,v=>{rQL=v;});mkGrid('rQCG','rQCL',CL,v=>{rQC=v;});
+  mkGrid('oPPG','oPPL',PL,v=>{oPP=v;},true);mkGrid('oPBG','oPBL',BL,v=>{oPB=v;},true);
+  mkGrid('oQPG','oQPL',PL,v=>{oQP=v;},true);mkGrid('oQBG','oQBL',BL,v=>{oQB=v;},true);
+}
+
+// ═══════════════════════════════════════════════════
+// FORM TYPE
+// ═══════════════════════════════════════════════════
+let FT='risk';
+function setType(t){
+  FT=t;
+  document.getElementById('fR').style.display=t==='risk'?'':'none';
+  document.getElementById('fO').style.display=t==='opportunity'?'':'none';
+  document.getElementById('fI').style.display=t==='issue'?'':'none';
+  document.getElementById('tbR').className='tb'+(t==='risk'?' ar':'');
+  document.getElementById('tbO').className='tb'+(t==='opportunity'?' ao':'');
+  document.getElementById('tbI').className='tb'+(t==='issue'?' ai':'');
+  const isEdit=!!document.getElementById('eId').value;
+  const lbl={risk:'Log New Risk',opportunity:'Log New Opportunity',issue:'Log New Issue'};
+  document.getElementById('fTitle').textContent=isEdit?`Edit ${t.charAt(0).toUpperCase()+t.slice(1)}`:lbl[t];
+  const sb=document.getElementById('sbBtn');
+  sb.className='btn '+(t==='risk'?'btn-p':t==='opportunity'?'btn-o':'btn-i');
+  sb.textContent=t==='risk'?'Submit Risk':t==='opportunity'?'Submit Opportunity':'Submit Issue';
+}
+
+// ═══════════════════════════════════════════════════
+// SAVE
+// ═══════════════════════════════════════════════════
+function saveItem(){
+  if(FT==='risk')saveRisk();
+  else if(FT==='opportunity')saveOpp();
+  else saveIssue();
+}
+
+function saveRisk(){
+  const t=v('rT'),c=v('rC'),s=v('rSt');
+  if(!t||!c||!s){fAlert('Please fill required fields (Title, Category, Statement).');return;}
+  if(!rPL||!rPC){fAlert('Please select Pre-Mitigation Likelihood and Consequence.');return;}
+  const eid=v('eId');
+  const item={type:'risk',id:eid||`R-${++CTR}`,title:t,category:c,statement:s,
+    cause:v('rCa'),preLik:rPL,preCon:rPC,postLik:rQL||rPL,postCon:rQC||rPC,
+    mitigation:v('rM'),mitOwner:v('rMO'),mitDate:v('rMD'),docs:v('rD'),notes:v('rN'),
+    status:rQL&&rQC?'mitigated':'open',
+    userId:CU.id,userName:CU.name,created:eid?(DB.find(x=>x.id===eid)||{}).created:today(),updated:today()};
+  upsert(item,eid);fAlert(`Risk ${item.id} ${eid?'updated':'submitted'} successfully.`,'s');clearForm();
+}
+
+function saveOpp(){
+  const t=v('oT'),c=v('oC'),s=v('oSt');
+  if(!t||!c||!s){fAlert('Please fill required fields (Title, Category, Statement).');return;}
+  if(!oPP||!oPB){fAlert('Please select initial Probability and Benefit ratings.');return;}
+  const eid=v('eId');
+  const item={type:'opportunity',id:eid||`O-${++CTR}`,title:t,category:c,statement:s,
+    basis:v('oBs'),preProb:oPP,preBen:oPB,postProb:oQP||oPP,postBen:oQB||oPB,
+    exploit:v('oEx'),exploitOwner:v('oOw'),targetDate:v('oDt'),expectedValue:v('oEV'),resources:v('oRs'),
+    docs:v('oD'),notes:v('oN'),
+    status:oQP&&oQB?'exploitation active':'identified',
+    userId:CU.id,userName:CU.name,created:eid?(DB.find(x=>x.id===eid)||{}).created:today(),updated:today()};
+  upsert(item,eid);fAlert(`Opportunity ${item.id} ${eid?'updated':'submitted'} successfully.`,'s');clearForm();
+}
+
+function saveIssue(){
+  const t=v('iT'),c=v('iC'),d=v('iDs'),sv=document.getElementById('iSv').value;
+  if(!t||!c||!d){fAlert('Please fill required fields (Title, Category, Description).');return;}
+  if(!sv){fAlert('Please select a Severity level.');return;}
+  const eid=v('eId');
+  const item={type:'issue',id:eid||`I-${++CTR}`,title:t,category:c,description:d,
+    cause:v('iCa'),severity:sv,urgency:document.getElementById('iUg').value,
+    systems:v('iSy'),discovered:v('iDd'),containment:v('iCo'),correctiveActions:v('iAc'),
+    actionOwner:v('iAo'),dueDate:v('iDu'),status:document.getElementById('iSt').value,
+    resDate:v('iRd'),docs:v('iDoc'),notes:v('iNo'),verify:v('iVe'),
+    userId:CU.id,userName:CU.name,created:eid?(DB.find(x=>x.id===eid)||{}).created:today(),updated:today()};
+  upsert(item,eid);fAlert(`Issue ${item.id} ${eid?'updated':'submitted'} successfully.`,'s');clearForm();
+}
+
+function upsert(item,eid){
+  if(eid){const i=DB.findIndex(x=>x.id===eid);if(i>-1)DB[i]=item;else DB.push(item);}else DB.push(item);save();
+}
+
+function v(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+
+function clearForm(){
+  ['rT','rC','rSt','rCa','rM','rMO','rMD','rD','rN',
+   'oT','oC','oSt','oBs','oEx','oOw','oDt','oEV','oRs','oD','oN',
+   'iT','iC','iDs','iCa','iSy','iDd','iCo','iAc','iAo','iDu','iRd','iDoc','iNo','iVe']
+  .forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['iSv','iUg'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('iSt').value='Identified';
+  document.getElementById('eId').value='';
+  rPL=rPC=rQL=rQC=oPP=oPB=oQP=oQB=0;
+  initGrids();setType(FT);
+}
+
+function fAlert(msg,t='i'){
+  const el=document.getElementById('fAlert');
+  el.innerHTML=`<div class="al al-${t==='s'?'s':'i'}">${msg}</div>`;
+  setTimeout(()=>el.innerHTML='',4000);
+}
+
+// ═══════════════════════════════════════════════════
+// SCORE / COLOR
+// ═══════════════════════════════════════════════════
+const RCLR=[
+  [0,'cg','cg','cg','cg','cy'],
+  [0,'cg','cg','cg','cy','co'],
+  [0,'cg','cg','cy','co','cr'],
+  [0,'cg','cy','co','cr','cr'],
+  [0,'cy','co','cr','cr','cd'],
+];
+const OCLR=[
+  [0,'p1','p1','p1','p2','p2'],
+  [0,'p1','p1','p2','p2','p3'],
+  [0,'p1','p2','p2','p3','p3'],
+  [0,'p2','p2','p3','p4','p4'],
+  [0,'p2','p3','p3','p4','p5'],
+];
+
+function rCls(l,c){const s=l*c;if(s>=20||(l>=5&&c>=4)||(l>=4&&c>=5))return'sk';if(s>=12||(l>=5&&c>=3))return'sk';if(s>=6)return'sh';if(s>=3)return'sm';return'sl';}
+function rHex(l,c){const cl=rCls(l,c);return cl==='sk'?'#ef4444':cl==='sh'?'#f97316':cl==='sm'?'#eab308':'#22c55e';}
+function oCls(s){if(s>=20)return'ox';if(s>=12)return'oh';if(s>=6)return'om';return'ol';}
+function oHex(s){if(s>=20)return'#7c3aed';if(s>=12)return'#8b5cf6';if(s>=6)return'#a78bfa';return'#c4b5fd';}
+function svCls(sv){if(sv==='Critical')return'sv-c';if(sv==='High')return'sv-h';if(sv==='Medium')return'sv-m';return'sv-l';}
+function stag(st,type){
+  if(type==='risk')return st==='mitigated'?'s-mit':'s-open';
+  if(type==='opportunity')return st==='captured'?'s-cap':st==='exploitation active'?'s-mon':'s-open';
+  return st==='Resolved'?'s-res':st==='Corrective Action In Progress'?'s-mon':'s-open';
+}
+
+// ═══════════════════════════════════════════════════
+// POPULATE FILTERS
+// ═══════════════════════════════════════════════════
+function popFilters(){
+  const ns=[...new Set(US.map(u=>u.name))];
+  ['rUser','rmUF','omUF','isUF'].forEach(id=>{
+    const s=document.getElementById(id);if(!s)return;
+    const cv=s.value;
+    s.innerHTML='<option value="">All Users</option>'+ns.map(n=>`<option${n===cv?' selected':''}>${n}</option>`).join('');
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════
+function renderAll(){renderDash();popFilters();}
+
+function renderDash(){
+  const rs=risks(),os=opps(),is=isss();
+  const openIs=is.filter(i=>i.status!=='Resolved').length;
+  const critR=rs.filter(r=>rCls(r.preLik,r.preCon)==='sk').length;
+  const hiO=os.filter(o=>o.preProb*o.preBen>=12).length;
+  const od=DB.filter(i=>isOD(i.dueDate||i.mitDate||i.targetDate)&&(i.type!=='issue'||i.status!=='Resolved')).length;
+
+  document.getElementById('statRow').innerHTML=[
+    {l:'Total Risks',v:rs.length,c:'var(--na)'},{l:'Open Issues',v:openIs,c:'var(--ic)'},
+    {l:'Opportunities',v:os.length,c:'var(--oc)'},{l:'Critical Risks',v:critR,c:'#ef4444'},
+    {l:'High-Value Opps',v:hiO,c:'#a78bfa'},{l:'Overdue Actions',v:od,c:od>0?'#ef4444':'var(--mu)'},
+  ].map(s=>`<div class="panel"><div class="pb" style="text-align:center;padding:16px;">
+    <div style="font-size:32px;font-weight:700;color:${s.c};font-family:var(--mo);">${s.v}</div>
+    <div style="font-size:10px;color:var(--mu);font-family:var(--fc);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;">${s.l}</div>
+  </div></div>`).join('');
+
+  const recent=[...DB].sort((a,b)=>b.updated.localeCompare(a.updated)).slice(0,8);
+  document.getElementById('dRecent').innerHTML=recent.length?recent.map(r=>`
+    <div onclick="showDet('${r.id}')" style="padding:9px 15px;border-bottom:1px solid rgba(11,61,145,.15);cursor:pointer;display:flex;align-items:center;gap:9px;">
+      <span class="${r.type==='risk'?'rid':r.type==='opportunity'?'oid':'iid'}">${r.id}</span>
+      <span style="font-size:13px;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.title}</span>
+      ${r.type==='risk'?`<span class="sc ${rCls(r.preLik,r.preCon)}">${r.preLik*r.preCon}</span>`:
+        r.type==='opportunity'?`<span class="sc ${oCls(r.preProb*r.preBen)}">${r.preProb*r.preBen}</span>`:
+        `<span class="sev ${svCls(r.severity)}">${r.severity}</span>`}
+    </div>`).join(''):'<div class="es">No items yet</div>';
+
+  const acts=DB.filter(i=>{
+    if(i.type==='issue'&&i.status!=='Resolved'&&(i.urgency==='High'||i.urgency==='Immediate'))return true;
+    if(i.type==='risk'&&i.status==='open'&&rCls(i.preLik,i.preCon)==='sk')return true;
+    if(isOD(i.dueDate||i.mitDate||i.targetDate)&&(i.type!=='issue'||i.status!=='Resolved'))return true;
+    return false;
+  }).slice(0,6);
+  document.getElementById('dAction').innerHTML=acts.length?acts.map(a=>`
+    <div onclick="showDet('${a.id}')" style="padding:9px 15px;border-bottom:1px solid rgba(11,61,145,.15);cursor:pointer;">
+      <div class="f ac g2u">
+        <span class="${a.type==='risk'?'rid':a.type==='opportunity'?'oid':'iid'}">${a.id}</span>
+        ${isOD(a.dueDate||a.mitDate||a.targetDate)?'<span class="od">OVERDUE</span>':''}
+        ${a.type==='issue'&&a.urgency==='Immediate'?'<span class="od">IMMEDIATE</span>':''}
+      </div>
+      <div style="font-size:13px;color:var(--nt);margin-top:3px;">${a.title}</div>
+    </div>`).join(''):'<div class="es" style="color:#22c55e;">No urgent actions</div>';
+
+  document.getElementById('dRmx').innerHTML='';document.getElementById('dRmx').appendChild(mkRMX(risks(),'pre','pre',52));
+  document.getElementById('dOmx').innerHTML='';document.getElementById('dOmx').appendChild(mkOMX(opps(),'pre',52));
+
+  const ic=['Identified','In Analysis','Corrective Action In Progress','Resolved'];
+  const ics=ic.map(c=>is.filter(i=>i.status===c).length);
+  const tot=is.length||1;
+  const cols=['rgba(245,158,11,.6)','rgba(249,115,22,.6)','rgba(74,158,255,.6)','rgba(34,197,94,.6)'];
+  document.getElementById('dIss').innerHTML=`<div style="display:flex;flex-direction:column;gap:9px;">
+    ${ic.map((c,i)=>`<div>
+      <div class="f jb" style="font-size:12px;margin-bottom:3px;"><span class="tm">${c}</span><span style="color:#fbbf24;font-family:var(--mo);">${ics[i]}</span></div>
+      <div class="pbar"><div class="pfill" style="width:${Math.round(ics[i]/tot*100)}%;background:${cols[i]};"></div></div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// REGISTER
+// ═══════════════════════════════════════════════════
+function renderReg(){
+  popFilters();
+  const q=v('rSrch').toLowerCase(),uF=v('rUser'),tF=v('rType');
+  const filt=DB.filter(i=>{
+    if(q&&!i.title.toLowerCase().includes(q)&&!i.id.toLowerCase().includes(q))return false;
+    if(uF&&i.userName!==uF)return false;
+    if(tF&&i.type!==tF)return false;
+    return true;
+  });
+  const gr={risk:filt.filter(i=>i.type==='risk'),opportunity:filt.filter(i=>i.type==='opportunity'),issue:filt.filter(i=>i.type==='issue')};
+  let html='';
+
+  if(gr.risk.length&&(!tF||tF==='risk')){
+    html+=`<div class="tsec"><div class="tsdot" style="background:var(--na);"></div><span class="tstxt" style="color:var(--na);">Risks (${gr.risk.length})</span></div>
+    <table class="dt"><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Owner</th><th>Pre L×C</th><th>Post L×C</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+    ${gr.risk.map(r=>`<tr>
+      <td><span class="rid">${r.id}</span></td>
+      <td style="color:#fff;max-width:200px;">${r.title}</td>
+      <td class="tm" style="font-size:12px;">${r.category}</td>
+      <td style="font-size:12px;">${r.userName}</td>
+      <td><span class="sc ${rCls(r.preLik,r.preCon)}">${r.preLik}×${r.preCon}</span></td>
+      <td><span class="sc ${rCls(r.postLik,r.postCon)}">${r.postLik}×${r.postCon}</span></td>
+      <td><span class="stag ${stag(r.status,'risk')}">${r.status}</span></td>
+      <td>${iActs(r)}</td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  if(gr.opportunity.length&&(!tF||tF==='opportunity')){
+    html+=`<div class="tsec"><div class="tsdot" style="background:var(--oc);"></div><span class="tstxt" style="color:var(--oc);">Opportunities (${gr.opportunity.length})</span></div>
+    <table class="dt"><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Owner</th><th>Pre P×B</th><th>Post P×B</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+    ${gr.opportunity.map(o=>`<tr>
+      <td><span class="oid">${o.id}</span></td>
+      <td style="color:#fff;max-width:200px;">${o.title}</td>
+      <td class="tm" style="font-size:12px;">${o.category}</td>
+      <td style="font-size:12px;">${o.userName}</td>
+      <td><span class="sc ${oCls(o.preProb*o.preBen)}">${o.preProb}×${o.preBen}</span></td>
+      <td><span class="sc ${oCls(o.postProb*o.postBen)}">${o.postProb}×${o.postBen}</span></td>
+      <td><span class="stag ${stag(o.status,'opportunity')}">${o.status}</span></td>
+      <td>${iActs(o)}</td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  if(gr.issue.length&&(!tF||tF==='issue')){
+    html+=`<div class="tsec"><div class="tsdot" style="background:var(--ic);"></div><span class="tstxt" style="color:var(--ic);">Issues (${gr.issue.length})</span></div>
+    <table class="dt"><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Owner</th><th>Severity</th><th>Due</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+    ${gr.issue.map(i=>`<tr>
+      <td><span class="iid">${i.id}</span></td>
+      <td style="color:#fff;max-width:200px;">${i.title}${isOD(i.dueDate)&&i.status!=='Resolved'?'<span class="od">OVERDUE</span>':''}</td>
+      <td class="tm" style="font-size:12px;">${i.category}</td>
+      <td style="font-size:12px;">${i.userName}</td>
+      <td><span class="sev ${svCls(i.severity)}">${i.severity}</span></td>
+      <td style="font-family:var(--mo);font-size:12px;${isOD(i.dueDate)&&i.status!=='Resolved'?'color:#ef4444;':''}">${i.dueDate||'–'}</td>
+      <td><span class="stag ${stag(i.status,'issue')}" style="font-size:9px;">${i.status}</span></td>
+      <td>${iActs(i)}</td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  document.getElementById('regBody').innerHTML=html||'<div class="es">No items match your filters</div>';
+}
+
+function iActs(item){
+  const ce=CU.role==='Administrator'||item.userId===CU.id;
+  return `<div class="f g2u">
+    <button class="btn btn-g btn-sm" onclick="showDet('${item.id}')">View</button>
+    ${ce?`<button class="btn btn-g btn-sm" onclick="editItem('${item.id}')">Edit</button>
+    <button class="btn btn-d btn-sm" onclick="delItem('${item.id}')">Del</button>`:''}
+  </div>`;
+}
+function delItem(id){if(!confirm('Delete this item?'))return;DB=DB.filter(i=>i.id!==id);save();renderReg();}
+
+// ═══════════════════════════════════════════════════
+// EDIT
+// ═══════════════════════════════════════════════════
+function editItem(id){
+  const item=DB.find(i=>i.id===id);if(!item)return;
+  goAdd(item.type);
+  document.getElementById('eId').value=id;
+  setTimeout(()=>{setType(item.type);populateForm(item);window.scrollTo(0,0);},50);
+}
+function populateForm(item){
+  if(item.type==='risk'){
+    sv('rT',item.title);sv('rC',item.category);sv('rSt',item.statement);sv('rCa',item.cause);
+    rPL=item.preLik;rPC=item.preCon;rQL=item.postLik;rQC=item.postCon;
+    setGV('rPLG','rPLL',item.preLik,LL);setGV('rPCG','rPCL',item.preCon,CL);
+    setGV('rQLG','rQLL',item.postLik,LL);setGV('rQCG','rQCL',item.postCon,CL);
+    sv('rM',item.mitigation);sv('rMO',item.mitOwner);sv('rMD',item.mitDate);sv('rD',item.docs);sv('rN',item.notes);
+  } else if(item.type==='opportunity'){
+    sv('oT',item.title);sv('oC',item.category);sv('oSt',item.statement);sv('oBs',item.basis);
+    oPP=item.preProb;oPB=item.preBen;oQP=item.postProb;oQB=item.postBen;
+    setGV('oPPG','oPPL',item.preProb,PL,true);setGV('oPBG','oPBL',item.preBen,BL,true);
+    setGV('oQPG','oQPL',item.postProb,PL,true);setGV('oQBG','oQBL',item.postBen,BL,true);
+    sv('oEx',item.exploit);sv('oOw',item.exploitOwner);sv('oDt',item.targetDate);
+    sv('oEV',item.expectedValue);sv('oRs',item.resources);sv('oD',item.docs);sv('oN',item.notes);
+  } else {
+    sv('iT',item.title);sv('iC',item.category);sv('iDs',item.description);sv('iCa',item.cause);
+    document.getElementById('iSv').value=item.severity;
+    document.getElementById('iUg').value=item.urgency||'';
+    sv('iSy',item.systems);sv('iDd',item.discovered);sv('iCo',item.containment);sv('iAc',item.correctiveActions);
+    sv('iAo',item.actionOwner);sv('iDu',item.dueDate);
+    document.getElementById('iSt').value=item.status||'Identified';
+    sv('iRd',item.resDate);sv('iDoc',item.docs);sv('iNo',item.notes);sv('iVe',item.verify);
+  }
+}
+function sv(id,val){const e=document.getElementById(id);if(e)e.value=val||'';}
+
+// ═══════════════════════════════════════════════════
+// DETAIL MODAL
+// ═══════════════════════════════════════════════════
+function showDet(id){
+  const item=DB.find(i=>i.id===id);if(!item)return;
+  document.getElementById('detTit').textContent=`${item.id} · ${item.title}`;
+  document.getElementById('detEdit').onclick=()=>{cm('detM');editItem(id);};
+  let b='';
+  if(item.type==='risk')b=rDet(item);
+  else if(item.type==='opportunity')b=oDet(item);
+  else b=iDet(item);
+  document.getElementById('detBdy').innerHTML=b;
+  document.getElementById('detM').classList.remove('hidden');
+}
+
+function rDet(r){return`
+  <div class="f ac g2u fw mb4">
+    <span class="rid">${r.id}</span>
+    <span class="stag ${stag(r.status,'risk')}">${r.status}</span>
+    <span class="tm" style="font-size:12px;">${r.category} · ${r.userName} · ${r.updated}</span>
+  </div>
+  <div class="sdiv">Risk Statement</div>
+  <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">${r.statement}</p>
+  ${r.cause?`<p style="font-size:12px;color:var(--mu);margin-bottom:14px;"><strong style="color:var(--nt);">Root Cause:</strong> ${r.cause}</p>`:''}
+  <div class="sdiv">Assessment</div>
+  <div class="f g2u mb4 fw">
+    <div class="panel" style="flex:1;min-width:140px;">
+      <div class="ph"><span class="pt" style="font-size:10px;">Pre-Mitigation</span></div>
+      <div class="pb" style="text-align:center;">
+        <div style="font-size:26px;font-weight:700;font-family:var(--mo);color:${rHex(r.preLik,r.preCon)};">${r.preLik*r.preCon}</div>
+        <div style="font-size:12px;color:var(--mu);">L:${r.preLik} × C:${r.preCon}</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:2px;">${LL[r.preLik]} / ${CL[r.preCon]}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;font-size:18px;color:var(--mu);">→</div>
+    <div class="panel" style="flex:1;min-width:140px;">
+      <div class="ph"><span class="pt" style="font-size:10px;">Post-Mitigation</span></div>
+      <div class="pb" style="text-align:center;">
+        <div style="font-size:26px;font-weight:700;font-family:var(--mo);color:${rHex(r.postLik,r.postCon)};">${r.postLik*r.postCon}</div>
+        <div style="font-size:12px;color:var(--mu);">L:${r.postLik} × C:${r.postCon}</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:2px;">${LL[r.postLik]} / ${CL[r.postCon]}</div>
+      </div>
+    </div>
+  </div>
+  <div class="sdiv">Mitigation Strategy</div>
+  <p style="font-size:14px;line-height:1.7;margin-bottom:8px;">${r.mitigation||'<em style="color:var(--mu)">No mitigation defined</em>'}</p>
+  ${r.mitOwner?`<div style="font-size:12px;color:var(--mu);">Owner: <span style="color:var(--nt);">${r.mitOwner}</span></div>`:''}
+  ${r.mitDate?`<div style="font-size:12px;color:var(--mu);">Target: <span style="color:var(--nt);">${r.mitDate}${isOD(r.mitDate)&&r.status!=='mitigated'?' <span class="od">OVERDUE</span>':''}</span></div>`:''}
+  ${r.docs?`<div style="font-size:12px;color:var(--mu);margin-top:5px;">Docs: <span style="color:var(--nt);">${r.docs}</span></div>`:''}
+  ${r.notes?`<div style="font-size:12px;color:var(--mu);">Notes: <span style="color:var(--nt);">${r.notes}</span></div>`:''}
+`;}
+
+function oDet(o){const ps=o.preProb*o.preBen,qs=o.postProb*o.postBen;return`
+  <div class="f ac g2u fw mb4">
+    <span class="oid">${o.id}</span>
+    <span class="stag ${stag(o.status,'opportunity')}">${o.status}</span>
+    <span class="tm" style="font-size:12px;">${o.category} · ${o.userName} · ${o.updated}</span>
+  </div>
+  <div class="sdiv" style="border-color:rgba(139,92,246,.4);color:#a78bfa;">Opportunity Statement</div>
+  <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">${o.statement}</p>
+  ${o.basis?`<p style="font-size:12px;color:var(--mu);margin-bottom:14px;"><strong style="color:var(--nt);">Basis:</strong> ${o.basis}</p>`:''}
+  <div class="sdiv" style="border-color:rgba(139,92,246,.4);color:#a78bfa;">Assessment (Probability × Benefit)</div>
+  <div class="f g2u mb4 fw">
+    <div class="panel" style="flex:1;min-width:140px;border-color:rgba(139,92,246,.3);">
+      <div class="ph" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);"><span class="pt" style="font-size:10px;color:#a78bfa;">Initial</span></div>
+      <div class="pb" style="text-align:center;">
+        <div style="font-size:26px;font-weight:700;font-family:var(--mo);color:${oHex(ps)};">${ps}</div>
+        <div style="font-size:12px;color:var(--mu);">P:${o.preProb} × B:${o.preBen}</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:2px;">${PL[o.preProb]} / ${BL[o.preBen]}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;font-size:18px;color:var(--mu);">→</div>
+    <div class="panel" style="flex:1;min-width:140px;border-color:rgba(139,92,246,.3);">
+      <div class="ph" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.3);"><span class="pt" style="font-size:10px;color:#a78bfa;">Post-Exploitation</span></div>
+      <div class="pb" style="text-align:center;">
+        <div style="font-size:26px;font-weight:700;font-family:var(--mo);color:${oHex(qs)};">${qs}</div>
+        <div style="font-size:12px;color:var(--mu);">P:${o.postProb} × B:${o.postBen}</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:2px;">${PL[o.postProb]} / ${BL[o.postBen]}</div>
+      </div>
+    </div>
+  </div>
+  <div class="sdiv" style="border-color:rgba(139,92,246,.4);color:#a78bfa;">Exploitation Strategy</div>
+  <p style="font-size:14px;line-height:1.7;margin-bottom:8px;">${o.exploit||'<em style="color:var(--mu)">No exploitation strategy defined</em>'}</p>
+  ${o.exploitOwner?`<div style="font-size:12px;color:var(--mu);">Owner: <span style="color:var(--nt);">${o.exploitOwner}</span></div>`:''}
+  ${o.targetDate?`<div style="font-size:12px;color:var(--mu);">Target: <span style="color:var(--nt);">${o.targetDate}</span></div>`:''}
+  ${o.expectedValue?`<div style="font-size:12px;color:var(--mu);">Expected Value: <span style="color:#a78bfa;font-weight:600;">${o.expectedValue}</span></div>`:''}
+  ${o.resources?`<div style="font-size:12px;color:var(--mu);">Resources: <span style="color:var(--nt);">${o.resources}</span></div>`:''}
+  ${o.docs?`<div style="font-size:12px;color:var(--mu);margin-top:5px;">Docs: <span style="color:var(--nt);">${o.docs}</span></div>`:''}
+`;}
+
+function iDet(i){return`
+  <div class="f ac g2u fw mb4">
+    <span class="iid">${i.id}</span>
+    <span class="sev ${svCls(i.severity)}">${i.severity}</span>
+    <span class="stag ${stag(i.status,'issue')}">${i.status}</span>
+    ${isOD(i.dueDate)&&i.status!=='Resolved'?'<span class="od">OVERDUE</span>':''}
+    <span class="tm" style="font-size:12px;">${i.category} · ${i.userName}</span>
+  </div>
+  <div class="sdiv" style="border-color:rgba(245,158,11,.4);color:#fbbf24;">Issue Description</div>
+  <p style="font-size:14px;line-height:1.7;margin-bottom:10px;">${i.description}</p>
+  ${i.cause?`<p style="font-size:12px;color:var(--mu);margin-bottom:6px;"><strong style="color:var(--nt);">Root Cause:</strong> ${i.cause}</p>`:''}
+  <div class="f fw g2u" style="font-size:12px;margin-bottom:12px;">
+    ${i.systems?`<span style="color:var(--mu);">Systems: <span style="color:var(--nt);">${i.systems}</span></span>`:''}
+    ${i.urgency?`<span style="color:var(--mu);">Urgency: <span style="color:var(--nt);">${i.urgency}</span></span>`:''}
+    ${i.discovered?`<span style="color:var(--mu);">Discovered: <span style="color:var(--nt);">${i.discovered}</span></span>`:''}
+  </div>
+  <div class="sdiv" style="border-color:rgba(245,158,11,.4);color:#fbbf24;">Corrective Action Plan</div>
+  ${i.containment?`<div style="margin-bottom:10px;"><div style="font-size:10px;color:#fbbf24;font-family:var(--mo);margin-bottom:3px;">CONTAINMENT</div><p style="font-size:14px;line-height:1.7;">${i.containment}</p></div>`:''}
+  ${i.correctiveActions?`<div style="margin-bottom:10px;"><div style="font-size:10px;color:#fbbf24;font-family:var(--mo);margin-bottom:3px;">CORRECTIVE ACTIONS</div><p style="font-size:14px;line-height:1.7;">${i.correctiveActions}</p></div>`:''}
+  <div class="f fw g2u" style="font-size:12px;margin-top:8px;">
+    ${i.actionOwner?`<span style="color:var(--mu);">Owner: <span style="color:var(--nt);">${i.actionOwner}</span></span>`:''}
+    ${i.dueDate?`<span style="color:var(--mu);">Due: <span style="${isOD(i.dueDate)&&i.status!=='Resolved'?'color:#ef4444;':'color:var(--nt);'}">${i.dueDate}</span></span>`:''}
+    ${i.resDate?`<span style="color:var(--mu);">Resolved: <span style="color:#22c55e;">${i.resDate}</span></span>`:''}
+  </div>
+  ${i.verify?`<div style="font-size:12px;color:var(--mu);margin-top:7px;">Verification: <span style="color:var(--nt);">${i.verify}</span></div>`:''}
+  ${i.docs?`<div style="font-size:12px;color:var(--mu);margin-top:4px;">Docs: <span style="color:var(--nt);">${i.docs}</span></div>`:''}
+`;}
+
+// ═══════════════════════════════════════════════════
+// RISK MATRIX
+// ═══════════════════════════════════════════════════
+function mkRMX(riskList,lk,ck,sz){
+  sz=sz||80;
+  const w=document.createElement('div');
+  w.style.cssText=`display:grid;grid-template-columns:20px repeat(5,${sz}px);grid-template-rows:repeat(5,${sz}px) 20px;gap:2px;`;
+  const yl=document.createElement('div');
+  yl.style.cssText='grid-column:1;grid-row:1/6;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--mu);font-family:var(--mo);';
+  yl.textContent='LIKELIHOOD →';w.appendChild(yl);
+  for(let row=5;row>=1;row--){
+    for(let col=1;col<=5;col++){
+      const cell=document.createElement('div');
+      cell.className=RCLR[row-1][col];
+      cell.style.cssText='border-radius:3px;display:flex;align-items:center;justify-content:center;position:relative;';
+      if(col===1){const l=document.createElement('span');l.style.cssText='position:absolute;left:2px;top:2px;font-size:8px;color:rgba(255,255,255,.22);font-family:var(--mo);';l.textContent=row;cell.appendChild(l);}
+      const here=riskList.filter(r=>r[lk+'Lik']===row&&r[ck+'Con']===col);
+      if(here.length){
+        const d=document.createElement('div');
+        d.style.cssText=`width:${Math.min(sz-6,20)}px;height:${Math.min(sz-6,20)}px;border-radius:50%;background:${rHex(row,col)};border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--mo);`;
+        d.textContent=here.length>1?here.length:here[0].id.replace('R-','');
+        d.title=here.map(r=>`${r.id}: ${r.title}`).join('\n');
+        d.onclick=()=>{if(here.length===1)showDet(here[0].id);};
+        cell.appendChild(d);
+      }
+      w.appendChild(cell);
+    }
+  }
+  const xl=document.createElement('div');
+  xl.style.cssText='grid-column:2/7;grid-row:6;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--mu);font-family:var(--mo);';
+  xl.textContent='CONSEQUENCE →';w.appendChild(xl);
+  return w;
+}
+
+function rLeg(){
+  const d=document.createElement('div');
+  d.style.cssText='display:flex;gap:9px;flex-wrap:wrap;margin-top:9px;font-size:11px;';
+  [['#22c55e','Low'],['#eab308','Moderate'],['#f97316','High'],['#ef4444','Critical'],['#7f1d1d','Extreme']].forEach(([c,l])=>{
+    const i=document.createElement('div');i.style.cssText='display:flex;align-items:center;gap:5px;color:var(--mu);';
+    i.innerHTML=`<span style="width:10px;height:10px;border-radius:2px;background:${c};opacity:.75;display:inline-block;"></span>${l}`;d.appendChild(i);
+  });return d;
+}
+
+function renderRMX(){
+  popFilters();
+  const uF=document.getElementById('rmUF').value,pF=document.getElementById('rmPF').value;
+  let fl=uF?risks().filter(r=>r.userName===uF):risks();
+  const cont=document.getElementById('rmxCont');cont.innerHTML='';
+  function mp(title,lk,ck){
+    const w=document.createElement('div');
+    const t=document.createElement('div');t.style.cssText='font-family:var(--fc);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:9px;text-align:center;';
+    t.textContent=title;w.appendChild(t);w.appendChild(mkRMX(fl,lk,ck,88));w.appendChild(rLeg());cont.appendChild(w);
+  }
+  if(pF!=='after')mp('Before Mitigation','pre','pre');
+  if(pF!=='before')mp('After Mitigation','post','post');
+
+  document.getElementById('rmxIdx').innerHTML=fl.length?`
+    <table class="dt"><thead><tr><th>ID</th><th>Title</th><th>Owner</th><th>Pre L×C</th><th>Score</th><th>Post L×C</th><th>Score</th><th>Reduction</th></tr></thead><tbody>
+    ${fl.map(r=>`<tr onclick="showDet('${r.id}')" style="cursor:pointer;">
+      <td><span class="rid">${r.id}</span></td><td style="color:#fff;">${r.title}</td>
+      <td class="tm" style="font-size:12px;">${r.userName}</td>
+      <td><span class="sc ${rCls(r.preLik,r.preCon)}">${r.preLik}×${r.preCon}</span></td>
+      <td style="font-family:var(--mo);color:${rHex(r.preLik,r.preCon)};">${r.preLik*r.preCon}</td>
+      <td><span class="sc ${rCls(r.postLik,r.postCon)}">${r.postLik}×${r.postCon}</span></td>
+      <td style="font-family:var(--mo);color:${rHex(r.postLik,r.postCon)};">${r.postLik*r.postCon}</td>
+      <td style="font-family:var(--mo);color:${r.preLik*r.preCon>r.postLik*r.postCon?'#22c55e':'var(--mu)'};">
+        ${r.preLik*r.preCon>r.postLik*r.postCon?'▼ '+(r.preLik*r.preCon-r.postLik*r.postCon):'–'}
+      </td>
+    </tr>`).join('')}</tbody></table>`:'<div class="es">No risks to display</div>';
+}
+
+// ═══════════════════════════════════════════════════
+// OPP MATRIX
+// ═══════════════════════════════════════════════════
+function mkOMX(oppList,phase,sz){
+  sz=sz||80;
+  const w=document.createElement('div');
+  w.style.cssText=`display:grid;grid-template-columns:20px repeat(5,${sz}px);grid-template-rows:repeat(5,${sz}px) 20px;gap:2px;`;
+  const yl=document.createElement('div');
+  yl.style.cssText='grid-column:1;grid-row:1/6;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--mu);font-family:var(--mo);';
+  yl.textContent='PROBABILITY →';w.appendChild(yl);
+  const pk=phase+'Prob',bk=phase+'Ben';
+  for(let row=5;row>=1;row--){
+    for(let col=1;col<=5;col++){
+      const cell=document.createElement('div');
+      cell.className=OCLR[row-1][col];
+      cell.style.cssText='border-radius:3px;display:flex;align-items:center;justify-content:center;position:relative;';
+      if(col===1){const l=document.createElement('span');l.style.cssText='position:absolute;left:2px;top:2px;font-size:8px;color:rgba(255,255,255,.22);font-family:var(--mo);';l.textContent=row;cell.appendChild(l);}
+      const here=oppList.filter(o=>o[pk]===row&&o[bk]===col);
+      if(here.length){
+        const d=document.createElement('div');const sc=row*col;
+        d.style.cssText=`width:${Math.min(sz-6,20)}px;height:${Math.min(sz-6,20)}px;border-radius:50%;background:${oHex(sc)};border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--mo);`;
+        d.textContent=here.length>1?here.length:here[0].id.replace('O-','');
+        d.title=here.map(o=>`${o.id}: ${o.title}`).join('\n');
+        d.onclick=()=>{if(here.length===1)showDet(here[0].id);};
+        cell.appendChild(d);
+      }
+      w.appendChild(cell);
+    }
+  }
+  const xl=document.createElement('div');
+  xl.style.cssText='grid-column:2/7;grid-row:6;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--mu);font-family:var(--mo);';
+  xl.textContent='BENEFIT →';w.appendChild(xl);
+  return w;
+}
+
+function oLeg(){
+  const d=document.createElement('div');d.style.cssText='display:flex;gap:9px;flex-wrap:wrap;margin-top:9px;font-size:11px;';
+  [['#c4b5fd','Low Value'],['#a78bfa','Moderate'],['#8b5cf6','High Value'],['#7c3aed','Maximum']].forEach(([c,l])=>{
+    const i=document.createElement('div');i.style.cssText='display:flex;align-items:center;gap:5px;color:var(--mu);';
+    i.innerHTML=`<span style="width:10px;height:10px;border-radius:2px;background:${c};opacity:.85;display:inline-block;"></span>${l}`;d.appendChild(i);
+  });return d;
+}
+
+function renderOMX(){
+  popFilters();
+  const uF=document.getElementById('omUF').value,pF=document.getElementById('omPF').value;
+  let fl=uF?opps().filter(o=>o.userName===uF):opps();
+  const cont=document.getElementById('omxCont');cont.innerHTML='';
+  function mp(title,phase){
+    const w=document.createElement('div');
+    const t=document.createElement('div');t.style.cssText='font-family:var(--fc);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:9px;text-align:center;';
+    t.textContent=title;w.appendChild(t);w.appendChild(mkOMX(fl,phase,88));w.appendChild(oLeg());cont.appendChild(w);
+  }
+  if(pF!=='after')mp('Initial Assessment','pre');
+  if(pF!=='before')mp('Post-Exploitation Estimate','post');
+
+  document.getElementById('omxIdx').innerHTML=fl.length?`
+    <table class="dt"><thead><tr><th>ID</th><th>Title</th><th>Owner</th><th>Pre P×B</th><th>Score</th><th>Post P×B</th><th>Score</th><th>Value</th><th>Gain</th></tr></thead><tbody>
+    ${fl.map(o=>`<tr onclick="showDet('${o.id}')" style="cursor:pointer;">
+      <td><span class="oid">${o.id}</span></td><td style="color:#fff;">${o.title}</td>
+      <td class="tm" style="font-size:12px;">${o.userName}</td>
+      <td><span class="sc ${oCls(o.preProb*o.preBen)}">${o.preProb}×${o.preBen}</span></td>
+      <td style="font-family:var(--mo);color:${oHex(o.preProb*o.preBen)};">${o.preProb*o.preBen}</td>
+      <td><span class="sc ${oCls(o.postProb*o.postBen)}">${o.postProb}×${o.postBen}</span></td>
+      <td style="font-family:var(--mo);color:${oHex(o.postProb*o.postBen)};">${o.postProb*o.postBen}</td>
+      <td style="font-size:12px;color:#a78bfa;">${o.expectedValue||'–'}</td>
+      <td style="font-family:var(--mo);color:${o.postProb*o.postBen>o.preProb*o.preBen?'#a78bfa':'var(--mu)'};">
+        ${o.postProb*o.postBen>o.preProb*o.preBen?'▲ '+(o.postProb*o.postBen-o.preProb*o.preBen):'–'}
+      </td>
+    </tr>`).join('')}</tbody></table>`:'<div class="es">No opportunities to display</div>';
+}
+
+// ═══════════════════════════════════════════════════
+// ISSUE BOARD
+// ═══════════════════════════════════════════════════
+function renderIss(){
+  popFilters();
+  const uF=document.getElementById('isUF').value,sF=document.getElementById('isSF').value;
+  let fl=isss().filter(i=>{
+    if(uF&&i.userName!==uF)return false;
+    if(sF&&i.severity!==sF)return false;
+    return true;
+  });
+  const cols=['Identified','In Analysis','Corrective Action In Progress','Resolved'];
+  const cc=['var(--ic)','var(--na)','#a78bfa','#22c55e'];
+  document.getElementById('issBoard').innerHTML=cols.map((col,ci)=>`
+    <div class="kc">
+      <div class="kct" style="color:${cc[ci]};">${col} <span style="color:var(--mu);">(${fl.filter(i=>i.status===col).length})</span></div>
+      ${fl.filter(i=>i.status===col).map(i=>`
+        <div class="kcard" onclick="showDet('${i.id}')">
+          <div class="f jb ac" style="margin-bottom:4px;">
+            <span class="iid" style="font-size:10px;">${i.id}</span>
+            <span class="sev ${svCls(i.severity)}" style="font-size:10px;">${i.severity}</span>
+          </div>
+          <div style="font-size:13px;color:#fff;margin-bottom:5px;">${i.title}</div>
+          <div style="font-size:11px;color:var(--mu);">${i.userName}</div>
+          ${i.dueDate?`<div style="font-size:11px;${isOD(i.dueDate)&&col!=='Resolved'?'color:#ef4444;':'color:var(--mu);'}">Due: ${i.dueDate}${isOD(i.dueDate)&&col!=='Resolved'?'<span class="od">OD</span>':''}</div>`:''}
+        </div>`).join('')||`<div style="font-size:12px;color:var(--mu);text-align:center;padding:14px;">No items</div>`}
+    </div>`).join('');
+
+  document.getElementById('issTbl').innerHTML=fl.length?`
+    <table class="dt"><thead><tr><th>ID</th><th>Title</th><th>Severity</th><th>Urgency</th><th>Owner</th><th>Due</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+    ${fl.map(i=>`<tr>
+      <td><span class="iid">${i.id}</span></td>
+      <td style="color:#fff;">${i.title}${isOD(i.dueDate)&&i.status!=='Resolved'?'<span class="od">OVERDUE</span>':''}</td>
+      <td><span class="sev ${svCls(i.severity)}">${i.severity}</span></td>
+      <td class="tm" style="font-size:12px;">${i.urgency||'–'}</td>
+      <td style="font-size:12px;">${i.userName}</td>
+      <td style="font-family:var(--mo);font-size:12px;${isOD(i.dueDate)&&i.status!=='Resolved'?'color:#ef4444;':''}">${i.dueDate||'–'}</td>
+      <td><span class="stag ${stag(i.status,'issue')}" style="font-size:9px;">${i.status}</span></td>
+      <td>${iActs(i)}</td>
+    </tr>`).join('')}</tbody></table>`:'<div class="es">No issues match your filters</div>';
+}
+
+// ═══════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════
+function renderAdm(){
+  if(CU.role!=='Administrator')return;
+  const ns=[...new Set(US.map(u=>u.name))];
+  document.getElementById('admBody').innerHTML=`
+    <table class="dt"><thead><tr><th>ID</th><th>Type</th><th>Title</th><th>Current Owner</th><th>Reassign To</th><th>Action</th></tr></thead><tbody>
+    ${DB.map(item=>`<tr>
+      <td><span class="${item.type==='risk'?'rid':item.type==='opportunity'?'oid':'iid'}">${item.id}</span></td>
+      <td style="font-family:var(--mo);font-size:10px;color:var(--mu);text-transform:uppercase;">${item.type}</td>
+      <td style="color:#fff;">${item.title}</td>
+      <td class="tm">${item.userName}</td>
+      <td><select id="as_${item.id}" style="font-size:12px;width:165px;">${ns.map(n=>`<option${n===item.userName?' selected':''}>${n}</option>`).join('')}</select></td>
+      <td><button class="btn btn-g btn-sm" onclick="reas('${item.id}')">Reassign</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+function reas(id){
+  const s=document.getElementById('as_'+id);if(!s)return;
+  const nn=s.value,nu=US.find(u=>u.name===nn);
+  const item=DB.find(i=>i.id===id);if(!item||!nu)return;
+  item.userName=nn;item.userId=nu.id;save();renderAdm();
+}
+
+// ═══════════════════════════════════════════════════
+// DEMO DATA SEED
+// ═══════════════════════════════════════════════════
+if(DB.length===0){
+  CTR=2000;
+  US=[{id:1,name:'Demo User',org:'Artemis Mission Systems',role:'Risk Owner'}];
+  DB=[
+    // RISKS
+    {type:'risk',id:'R-2001',title:'Thermal protection system failure on re-entry',category:'Safety',
+     statement:'IF TPS sustains micrometeorite impact during orbital operations, THEN insulation integrity is compromised, RESULTING IN catastrophic re-entry failure and crew loss.',
+     cause:'Orbital debris field at higher-than-predicted density in target orbit.',
+     preLik:3,preCon:5,postLik:2,postCon:5,mitigation:'Deploy redundant TPS layer; increase pre-flight inspection frequency; add debris-avoidance maneuver budget.',
+     mitOwner:'Thermal Systems Team',mitDate:'2026-06-30',docs:'STS-107 LFR, NPR 8715.3',notes:'Watch item – MMOD season',
+     status:'open',userId:1,userName:'Demo User',created:'2026-01-15',updated:'2026-04-10'},
+    {type:'risk',id:'R-2002',title:'Launch window closure due to range weather',category:'Schedule',
+     statement:'IF Eastern Range weather violations exceed 72-hour forecast, THEN launch cannot proceed, RESULTING IN minimum 48-hour scrub and mission delay.',
+     cause:'Atlantic storm system patterns Q1.',preLik:4,preCon:2,postLik:2,postCon:2,
+     mitigation:'Secondary window planning; 5-day weather margin; coordinate alternate window with Range.',
+     mitOwner:'Launch Director',mitDate:'2026-05-01',docs:'Range Users Handbook',notes:'Monitor 45WS forecasts',
+     status:'mitigated',userId:1,userName:'Demo User',created:'2026-02-01',updated:'2026-03-20'},
+    {type:'risk',id:'R-2003',title:'GNC software anomaly – memory corruption',category:'Technical',
+     statement:'IF undetected memory corruption occurs in GNC flight computer, THEN navigation solution diverges, RESULTING IN loss of vehicle control authority.',
+     cause:'Single-event upsets from galactic cosmic ray radiation environment.',preLik:2,preCon:5,postLik:1,postCon:5,
+     mitigation:'Triple-redundant voting logic; radiation hardening spec upgrade; autonomous safing mode.',
+     mitOwner:'Avionics Team',mitDate:'2026-07-15',docs:'GNC-ICD-004',notes:'',
+     status:'mitigated',userId:1,userName:'Demo User',created:'2026-02-15',updated:'2026-04-01'},
+    {type:'risk',id:'R-2004',title:'Cost overrun on payload integration',category:'Cost',
+     statement:'IF vendor delivers subsystems 30 days late, THEN payload integration schedule is compressed, RESULTING IN cost growth of 15–20%.',
+     cause:'Supply chain delays for radiation-hardened COTS electronics.',preLik:4,preCon:3,postLik:3,postCon:2,
+     mitigation:'Establish alternate vendor; firm delivery contract with penalties; 10% cost reserve.',
+     mitOwner:'Program Manager',mitDate:'2026-05-15',docs:'Contract MOD-21',notes:'Monthly PMR review required',
+     status:'open',userId:1,userName:'Demo User',created:'2026-03-01',updated:'2026-04-15'},
+    // OPPORTUNITIES
+    {type:'opportunity',id:'O-2001',title:'Early vendor delivery enables schedule recovery',category:'Schedule Acceleration',
+     statement:'IF primary propulsion vendor delivers 3 weeks early as current tracking suggests, THEN integration can begin ahead of schedule, RESULTING IN 14-day schedule margin recovery.',
+     basis:'Current tracking shows vendor 5 days ahead of production milestones.',
+     preProb:3,preBen:4,postProb:4,postBen:4,
+     exploit:'Negotiate delivery pull-in; pre-stage integration facility; assign additional technicians.',
+     exploitOwner:'Integration Manager',targetDate:'2026-05-15',expectedValue:'14-day schedule margin',resources:'2 FTE, facility readiness',
+     docs:'Vendor Delivery Schedule Rev 5',notes:'Discuss at weekly PMR',
+     status:'exploitation active',userId:1,userName:'Demo User',created:'2026-03-01',updated:'2026-04-12'},
+    {type:'opportunity',id:'O-2002',title:'COTS avionics substitution reduces development cost',category:'Cost Savings',
+     statement:'IF we substitute heritage COTS avionics for custom design, THEN development cost decreases, RESULTING IN an estimated $1.2M savings.',
+     basis:'Trade study TS-2026-007 confirms performance equivalence.',
+     preProb:4,preBen:3,postProb:4,postBen:3,
+     exploit:'Complete qualification testing; update ICDs; submit Engineering Change Order for approval.',
+     exploitOwner:'Systems Engineering',targetDate:'2026-06-01',expectedValue:'$1.2M cost reduction',resources:'1 FTE + lab time',
+     docs:'Trade Study TS-2026-007',notes:'ECO approval pending',
+     status:'identified',userId:1,userName:'Demo User',created:'2026-03-15',updated:'2026-04-05'},
+    {type:'opportunity',id:'O-2003',title:'ESA shared ground station eliminates TDRS lease',category:'Partnership / Collaboration',
+     statement:'IF ESA agrees to share Kourou ground station downlink time, THEN data downlink bandwidth doubles, RESULTING IN reduced latency and elimination of one TDRS lease.',
+     basis:'ESA expressed interest at March 2026 bilateral meeting.',
+     preProb:2,preBen:5,postProb:3,postBen:5,
+     exploit:'Initiate MOU discussions; define data-sharing protocols; obtain HQ Agency approval.',
+     exploitOwner:'Program Manager',targetDate:'2026-08-01',expectedValue:'$800K TDRS savings + 2× downlink',resources:'Legal, International Affairs staff',
+     docs:'ESA Bilateral Minutes 2026-03',notes:'High value – pursue aggressively',
+     status:'identified',userId:1,userName:'Demo User',created:'2026-04-01',updated:'2026-04-20'},
+    // ISSUES
+    {type:'issue',id:'I-2001',title:'Cracked weld on LOX feedline support bracket',category:'Technical Deficiency',
+     description:'Hairline crack discovered during post-hydrostatic test inspection of LOX feedline support bracket SN-007. Crack measures 3.2mm in the heat-affected zone. Affects primary load path during max-q.',
+     cause:'Inadequate pre-heat protocol during welding; welder qualification gap identified in process audit.',
+     severity:'High',urgency:'High',systems:'Propulsion – LOX Feedline Assembly',discovered:'2026-04-18',
+     containment:'Isolate affected assembly; halt LOX loading operations; notify Safety Officer and Chief Engineer.',
+     correctiveActions:'Remove and replace bracket SN-007; revise weld procedure WP-LOX-22; re-qualify affected welders; perform 100% NDE on all remaining brackets.',
+     actionOwner:'Propulsion Team Lead',dueDate:'2026-05-10',status:'Corrective Action In Progress',resDate:'',
+     docs:'NDE Report NDE-2026-041, CAR-2026-011',notes:'Briefed PRCB 2026-04-19',
+     verify:'Successful hydrostatic retest + NDE certification of replacement bracket',
+     userId:1,userName:'Demo User',created:'2026-04-18',updated:'2026-04-20'},
+    {type:'issue',id:'I-2002',title:'FDIR algorithm false positive on thruster valve fault',category:'Technical Deficiency',
+     description:'Regression testing reveals FDIR fault detection algorithm produces false positive for thruster valve fault under specific pressure transient conditions. Reproducible in high-fidelity simulation; not caught in prior build.',
+     cause:'Code merge conflict in build 4.1.7 introduced logic inversion in valve state check.',
+     severity:'Critical',urgency:'Immediate',systems:'Software – FDIR, Propulsion Control',discovered:'2026-04-15',
+     containment:'Suspend builds using 4.1.7; revert to 4.1.6 baseline; activate software review board; daily status briefings.',
+     correctiveActions:'Fix logic inversion in valve state check; expand regression test suite with boundary conditions for all valve fault modes; independent code review.',
+     actionOwner:'Flight Software Lead',dueDate:'2026-04-28',status:'In Analysis',resDate:'',
+     docs:'SCR-2026-089, TR-FDIR-2026-04',notes:'Stop-work status – director briefed',
+     verify:'100% regression test pass; independent software safety review sign-off',
+     userId:1,userName:'Demo User',created:'2026-04-15',updated:'2026-04-21'},
+    {type:'issue',id:'I-2003',title:'Star tracker supplier 6-week delivery slip',category:'Supplier / Vendor',
+     description:'Prime star tracker vendor notified 6-week delivery slip due to radiation-hardened FPGA shortage. New delivery 2026-06-15 vs. contractual 2026-05-01. Directly impacts I&T start milestone MS-14.',
+     cause:'Global shortage of rad-hard FPGA parts affecting multiple prime defense contractors.',
+     severity:'Medium',urgency:'Medium',systems:'Attitude Determination – Star Tracker',discovered:'2026-04-10',
+     containment:'Identify alternate vendor; evaluate heritage unit as substitute for early I&T phases.',
+     correctiveActions:'Activate alternate source clause; expedite heritage unit recertification; negotiate partial delivery of flight-ready units.',
+     actionOwner:'Supply Chain Manager',dueDate:'2026-05-20',status:'Identified',resDate:'',
+     docs:'Contract Mod-18, CAR-2026-009',notes:'8-day schedule float partially absorbs slip',
+     verify:'Receipt of flight units with CoC; successful incoming inspection',
+     userId:1,userName:'Demo User',created:'2026-04-10',updated:'2026-04-10'},
+    {type:'issue',id:'I-2004',title:'Battery pack capacity below spec at cold soak',category:'Technical Deficiency',
+     description:'Battery pack BP-003 shows 12% capacity degradation at -20°C soak test vs. 5% spec limit. Directly impacts eclipse operations power margin; current margin insufficient for nominal ops.',
+     cause:'Electrolyte viscosity change at low temperature exceeds original design assumptions.',
+     severity:'High',urgency:'Medium',systems:'Power – Battery Pack BP-003',discovered:'2026-03-28',
+     containment:'Remove BP-003 from flight manifest; flag power margin in FRR package; activate backup heater circuit.',
+     correctiveActions:'Evaluate alternative electrolyte formulation; add thermostatically controlled heater to battery bay; revise thermal model; retest.',
+     actionOwner:'Power Systems Engineer',dueDate:'2026-05-30',status:'Corrective Action In Progress',resDate:'',
+     docs:'TR-PWR-2026-12',notes:'Power margin now 8% with workaround heater installed',
+     verify:'Repeat cold soak test with revised design; margin analysis delta review',
+     userId:1,userName:'Demo User',created:'2026-03-28',updated:'2026-04-15'},
+    {type:'issue',id:'I-2005',title:'EMI coupling in avionics bay – S-band transmitter',category:'Interface Problem',
+     description:'S-band transmitter operations induce 8 dB interference in adjacent IMU signal path during transmission. Identified during EMI/EMC qualification campaign. Fails MIL-STD-461 CS114 limit.',
+     cause:'Inadequate shielding on IMU signal harness routing near transmitter; ground plane gap in avionics bay.',
+     severity:'Medium',urgency:'Low',systems:'Avionics – RF, IMU',discovered:'2026-03-15',
+     containment:'Operationally interleave transmitter and IMU sampling windows as software workaround.',
+     correctiveActions:'Add braided shield to IMU signal harness; fill ground plane gap; add ferrite beads at connector backshells; retest per MIL-STD-461.',
+     actionOwner:'EMC Engineer',dueDate:'2026-06-01',status:'Corrective Action In Progress',resDate:'',
+     docs:'EMC Report EMC-2026-03, NCR-2026-028',notes:'Software workaround effective but not preferred for ops',
+     verify:'Pass MIL-STD-461 CS114; updated EMI/EMC qualification report',
+     userId:1,userName:'Demo User',created:'2026-03-15',updated:'2026-04-08'},
+    {type:'issue',id:'I-2006',title:'Requirements gap – EVA suit interface undefined',category:'Requirements Gap',
+     description:'Interface requirements between crew module and EVA suit port remain undefined in ICD-CM-003. Gap identified during joint interface working group. Blocks suit integration PDR.',
+     cause:'EVA system requirements allocated to contractor before ICD was finalized; allocation error in SysML model.',
+     severity:'Low',urgency:'Medium',systems:'Crew Systems – EVA Port Interface',discovered:'2026-04-02',
+     containment:'Issue interim interface control notice (ICN) to unblock PDR; schedule ICD reconciliation workshop.',
+     correctiveActions:'Convene joint requirements review board; update ICD-CM-003; validate in SysML and propagate delta requirements to contractor.',
+     actionOwner:'Systems Engineer',dueDate:'2026-04-30',status:'Resolved',resDate:'2026-04-22',
+     docs:'ICD-CM-003 Rev B, ICN-2026-005',notes:'ICN issued; ICD Rev B signed off 2026-04-22',
+     verify:'ICD Rev B approved by both parties; SysML model updated and validated',
+     userId:1,userName:'Demo User',created:'2026-04-02',updated:'2026-04-22'},
+  ];
+  save();
+}
+</script>
+</body>
+</html>
